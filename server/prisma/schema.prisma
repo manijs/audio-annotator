@@ -1,0 +1,68 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime @default(now())
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model Project {
+  createdAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  projectName String   @unique
+  titles      Title[]
+  updatedAt   DateTime @updatedAt
+}
+
+model Title {
+  createdAt        DateTime  @default(now())
+  id               String    @id @default(cuid())
+  project          Project?  @relation(fields: [projectId], references: [id])
+  projectId        String?
+  refTranscription String?
+  sampleRate       Float?
+  segments         Segment[]
+  sourceDuration   Float?
+  sourceFilename   String    @unique
+  sourceFilePath   String    @unique
+  sourceFileSize   Float?
+  updatedAt        DateTime  @updatedAt
+}
+
+model Segment {
+  annotation       Annotation? @relation(fields: [annotationId], references: [id])
+  annotationId     String?     @unique
+  createdAt        DateTime    @default(now())
+  duration         Float?
+  endSample        Int?
+  fileAbsolutePath String      @unique
+  filename         String      @unique
+  id               String      @id @default(cuid())
+  startSample      Int?
+  title            Title?      @relation(fields: [titleId], references: [id])
+  titleId          String?
+  updatedAt        DateTime    @updatedAt
+}
+
+model Annotation {
+  annotation         String?
+  cleansedAnnotation String?
+  createdAt          DateTime @default(now())
+  emotionalType      String?
+  id                 String   @id @default(cuid())
+  isValid            Boolean?
+  segment            Segment?
+  updatedAt          DateTime @updatedAt
+}
